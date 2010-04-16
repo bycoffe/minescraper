@@ -260,9 +260,10 @@ class MineScraper(object):
         data = []
         for cell in row.findAll('td'):
             if cell.find('a'):
-                data.append(cell.find('a').renderContents().strip())
+                content = cell.find('a').renderContents()
             else:
-                data.append(cell.renderContents().strip())
+                content = cell.renderContents()
+            data.append(content.replace('&nbsp;', ' ').strip())
 
         return data
 
