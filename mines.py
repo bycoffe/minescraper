@@ -38,11 +38,18 @@ class MineScraper(object):
                          'paid_proposed_penalty', 'last_action', ]
 
     def __init__(self, mine_filename, inspection_filename, accident_filename,
-            contractor_filename, violation_filename, assessment_filename):
+            contractor_filename, violation_filename, assessment_filename,
+            include_inspections=True, include_violations=True, 
+            include_assessments=True, include_accidents=True,
+            include_contractors=True):
         """Arguments are the filenames where each type 
         of data should be saved. This should be overridden 
         if you'd rather save the data to a database or 
-        output it in another way."""
+        output it in another way. The include_ arguments
+        are used to determine whether to include that data. 
+        Leaving out unnecessary data sets can speed this script
+        up considerably.
+        """
         self.mine_filename = mine_filename
         self.inspection_filename = inspection_filename
         self.accident_filename = accident_filename
@@ -50,15 +57,31 @@ class MineScraper(object):
         self.violation_filename = violation_filename
         self.assessment_filename = assessment_filename
 
+        self.include_inspections = include_inspections
+        self.include_violations = include_violations
+        self.include_assessments = include_assessments
+        self.include_accidents = include_accidents
+        self.include_contractors = include_contractors
+
 
     def write_headers(self):
         # Output header rows for each data file.
         csv.writer(open(self.mine_filename, 'a')).writerow(self.MINE_FIELDS)
-        csv.writer(open(self.inspection_filename, 'a')).writerow(self.INSPECTION_FIELDS)
-        csv.writer(open(self.accident_filename, 'a')).writerow(self.ACCIDENT_FIELDS)
-        csv.writer(open(self.contractor_filename, 'a')).writerow(self.CONTRACTOR_FIELDS)
-        csv.writer(open(self.violation_filename, 'a')).writerow(self.VIOLATION_FIELDS)
-        csv.writer(open(self.assessment_filename, 'a')).writerow(self.ASSESSMENT_FIELDS)
+
+        if self.include_inspections:
+            csv.writer(open(self.inspection_filename, 'a')).writerow(self.INSPECTION_FIELDS)
+
+        if self.include_accidents:
+            csv.writer(open(self.accident_filename, 'a')).writerow(self.ACCIDENT_FIELDS)
+
+        if self.include_contractors:
+            csv.writer(open(self.contractor_filename, 'a')).writerow(self.CONTRACTOR_FIELDS)
+
+        if self.include_violations:
+            csv.writer(open(self.violation_filename, 'a')).writerow(self.VIOLATION_FIELDS)
+
+        if self.include_assessments:
+            csv.writer(open(self.assessment_filename, 'a')).writerow(self.ASSESSMENT_FIELDS)
 
 
     def scrape(self, state):
@@ -73,7 +96,7 @@ class MineScraper(object):
 
             # If this mine has had at least one inspection,
             # get data about the inspection.
-            if int(row_data['inspections']) > 0:
+            if int(row_data['inspections']) > 0 and self.include_inspections:
                 for inspection_row in self._get_inspection_data(row_data):
                     inspection_row = dict(zip(self.INSPECTION_FIELDS, inspection_row))
                     self._output_data(open(self.inspection_filename, 'a'),
@@ -82,7 +105,7 @@ class MineScraper(object):
 
                     # If any violations were reported during this
                     # inspection, get data about it.
-                    if int(inspection_row['violations']) > 0:
+                    if int(inspection_row['violations']) > 0 and self.include_violations:
                         for violation_row in self._get_violation_data(inspection_row):
                             violation_row = dict(zip(self.VIOLATION_FIELDS,
                                                      violation_row))
@@ -92,7 +115,7 @@ class MineScraper(object):
 
                             # If any penalties were assessed for this 
                             # violation, get the available data about them.
-                            if violation_row['assessed'] == 'Yes':
+                            if violation_row['assessed'] == 'Yes' and self.include_assessments:
                                 for assessment_row in self._get_assessment_data(violation_row):
                                     self._output_data(open(self.assessment_filename, 'a'),
                                                       assessment_row,
@@ -100,7 +123,7 @@ class MineScraper(object):
 
 
             # Get data about any accidents reported at this mine.
-            if int(row_data['accidents']) > 0:
+            if int(row_data['accidents']) > 0 and self.include_accidents:
                 self._get_related_data(row_data, 
                                        'http://ogesdw.dol.gov/mshaAccident.php',
                                        self.ACCIDENT_FIELDS,
@@ -109,7 +132,7 @@ class MineScraper(object):
 
 
             # Get data about any contractors associated with this mine.
-            if int(row_data['contractors']) > 0:
+            if int(row_data['contractors']) > 0 and self.include_contractors:
                 self._get_related_data(row_data,
                                        'http://ogesdw.dol.gov/mshaMineContractor.php',
                                        self.CONTRACTOR_FIELDS,

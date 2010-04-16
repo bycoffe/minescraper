@@ -102,6 +102,17 @@ _Other usage scenarios:_
 
     >>> scraper.scrape('WV') # Just download data for West Virginia
 
+* Get only a list of mines (and the rest of the data in mines.csv) for a state:
+
+    >>> from minescraper.mines import MineScraper
+
+    # Don't include inspections, violations, assessments, accidents or contractors
+    >>> scraper = MineScraper('mines.csv', 'inspections.csv', 'accidents.csv', 'contractors.csv', 'violations.csv', 'assessments.csv', False, False, False, False, False)
+
+    >>> scraper.write_headers()
+
+    >>> scraper.scrape('WV')
+
 ## License
 Two-clause BSD. See [LICENSE](http://github.com/bycoffe/minescraper/blob/master/LICENSE)
 
