@@ -106,7 +106,6 @@ _Other usage scenarios:_
 
     >>> from minescraper.mines import MineScraper
 
-    # Don't include inspections, violations, assessments, accidents or contractors
     >>> scraper = MineScraper('mines.csv', 'inspections.csv', 'accidents.csv', 'contractors.csv', 'violations.csv', 'assessments.csv', False, False, False, False, False)
 
     >>> scraper.write_headers()
@@ -117,7 +116,6 @@ _Other usage scenarios:_
 
     >>> from minescraper.mines import MineScraper
 
-    # Don't include inspections, violations, assessments, accidents or contractors
     >>> scraper = MineScraper('mines.csv', 'inspections.csv', 'accidents.csv', 'contractors.csv', 'violations.csv', 'assessments.csv', False, False, False, False, False, True)
 
     >>> scraper.write_headers()
