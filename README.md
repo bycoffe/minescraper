@@ -95,7 +95,6 @@ _Other usage scenarios:_
 * Download data for a single state:
 
 [code]
-
     >>> from minescraper.mines import MineScraper
 
     >>> scraper = MineScraper('mines.csv', 'inspections.csv', 'accidents.csv', 'contractors.csv', 'violations.csv', 'assessments.csv')
