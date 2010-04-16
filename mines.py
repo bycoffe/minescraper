@@ -41,12 +41,16 @@ class MineScraper(object):
             contractor_filename, violation_filename, assessment_filename,
             include_inspections=True, include_violations=True, 
             include_assessments=True, include_accidents=True,
-            include_contractors=True):
+            include_contractors=True,
+            active_only=False):
         """Arguments are the filenames where each type 
         of data should be saved. This should be overridden 
         if you'd rather save the data to a database or 
         output it in another way. The include_ arguments
         are used to determine whether to include that data. 
+
+        Set active_only to True to retrieve data only for active mines.
+
         Leaving out unnecessary data sets can speed this script
         up considerably.
         """
@@ -62,6 +66,8 @@ class MineScraper(object):
         self.include_assessments = include_assessments
         self.include_accidents = include_accidents
         self.include_contractors = include_contractors
+
+        self.active_only = active_only
 
 
     def write_headers(self):
@@ -90,6 +96,13 @@ class MineScraper(object):
         # Loop through a list of all the mines in this state
         # and basic data about them (type, operator, etc.)
         for row_data in self._get_state_mines(self.state):
+
+            # Check whether this mine is active and whether 
+            # the active_only flag is set to True, then act
+            # accordingly.
+            if self.active_only and row_data['status'] != 'Active':
+                continue
+
             self._output_data(open(self.mine_filename, 'a'), 
                               row_data,
                               self.MINE_FIELDS)
@@ -156,7 +169,11 @@ class MineScraper(object):
         # at the time of this writing the most 
         # mines in a single state was less than 10,000.)
         if len(data) >= self.ROWS_PER_PAGE:
-            page = self._get_state_page(state, True)
+            page = self._get_state_page(state, 2)
+            data += self._parse_page(page)
+
+        if len(data) >= self.ROWS_PER_PAGE * 2:
+            page = self._get_state_page(state, 3)
             data += self._parse_page(page)
 
         for row in data:
@@ -222,7 +239,7 @@ class MineScraper(object):
             self._output_data(open(filename, 'a'), row, fields)
                               
 
-    def _get_state_page(self, state, second_set=False):
+    def _get_state_page(self, state, set_num=0):
         """Set second_set to True if it's the second pass for this state,
         because only 5000 results can be fetched at a time.
         """
@@ -230,8 +247,8 @@ class MineScraper(object):
         data = {'states[]': state,
                 'MSHA': 'MSHA',
                 'resultsPerPage': self.ROWS_PER_PAGE,
-                'offset': (self.ROWS_PER_PAGE if second_set else 0),
-                'currentPage': (2 if second_set else 1),
+                'offset': self.ROWS_PER_PAGE * (set_num-1),
+                'currentPage': set_num,
                 }
         return self._get_page(url, data)
 
