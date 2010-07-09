@@ -20,8 +20,8 @@ class MineScraper(object):
     INSPECTION_FIELDS = ['event_no', 'mine_id', 'violations', 'activity_code',
                          'description', 'begin_date', 'end_date', ]
 
-    ACCIDENT_FIELDS = ['mine_id', 'subunit', 'subunit_description', 'date',
-                       'injury_degree', 'classification_description',
+    ACCIDENT_FIELDS = ['mine_id', 'contractor_id', 'subunit', 'subunit_description', 
+                       'date', 'injury_degree', 'classification_description',
                        'occupation_code_description', 'miner_activity',
                        'total_experience', 'mine_experience', 'job_experience',
                        'accident_narrative',]
